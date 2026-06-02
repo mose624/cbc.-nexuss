@@ -1586,28 +1586,35 @@ function injectContactInfo() {
   const whatsappPhone = WHATSAPP_PHONE;
   const adminEmail = ADMIN_EMAIL;
   
-  // Replace *** placeholders with actual phone numbers
-  setTimeout(() => {
-    document.body.innerHTML = document.body.innerHTML
-      .replace(/wa\.me\/254xxx/g, `wa.me/${whatsappPhone}`)
-      .replace(/>\*\*\*</g, `>${mpesaPhone}<`);
-  }, 0);
-  
-  // Update all WhatsApp links
-  document.querySelectorAll('[href*="wa.me/"]').forEach((link) => {
+  // Update all WhatsApp links with placeholder URLs
+  document.querySelectorAll('[href*="wa.me/254xxx"]').forEach((link) => {
     link.href = `https://wa.me/${whatsappPhone}`;
+  });
+  
+  // Update tel links with placeholder numbers
+  document.querySelectorAll('[href^="tel:***"]').forEach((link) => {
+    link.href = `tel:${mpesaPhone}`;
   });
   
   // Update M-Pesa button text
   const headerMpesa = document.getElementById('headerMpesaButton');
-  if (headerMpesa) {
+  if (headerMpesa && headerMpesa.textContent.includes('***')) {
     headerMpesa.textContent = `M-Pesa ${mpesaPhone}`;
   }
   
-  // Update contact tel links
-  document.querySelectorAll('[href^="tel:"]').forEach((link) => {
-    link.href = `tel:${mpesaPhone}`;
-  });
+  // Update any text nodes containing *** placeholders
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    null,
+    false
+  );
+  let node;
+  while (node = walker.nextNode()) {
+    if (node.textContent.includes('***')) {
+      node.textContent = node.textContent.replace(/\*\*\*/g, mpesaPhone);
+    }
+  }
   
   // Update email placeholders
   document.querySelectorAll('[placeholder*="gmail"]').forEach((elem) => {
@@ -1618,9 +1625,9 @@ function injectContactInfo() {
 renderGradeDashboard();
 setupFilters();
 renderQuickTypes();
-injectContactInfo();
 restoreAdminAccess();
 bindEvents();
+injectContactInfo();
 renderResources();
 renderTrending();
 renderCart();
